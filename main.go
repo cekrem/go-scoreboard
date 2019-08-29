@@ -2,8 +2,10 @@ package main
 
 import (
 	"bufio"
+	cRand "crypto/rand"
 	"fmt"
 	"log"
+	"math/big"
 	"math/rand"
 	"os"
 	"regexp"
@@ -14,7 +16,7 @@ import (
 	figure "github.com/common-nighthawk/go-figure"
 )
 
-const unicornASCII = `
+const zeldaASCII = `
 __________________________††¥¥
 _________________________††††¥¥
 ________________________††††††¥¥
@@ -103,7 +105,10 @@ func main() {
 	}
 
 	// shuffle score
-	rand.Seed(time.Now().UnixNano())
+	seed, err := cRand.Int(cRand.Reader, big.NewInt(100000000))
+	failOnErr(err)
+
+	rand.Seed(seed.Int64() + time.Now().UnixNano())
 	for countdown := len(score); countdown > 0; countdown-- {
 		rand.Shuffle(len(score), func(i, j int) {
 			score[i], score[j] = score[j], score[i]
@@ -115,7 +120,11 @@ func main() {
 	}
 
 	nameASCII := figure.NewFigure(score[0], "", true)
-	fmt.Println("", winnerASCII, nameASCII, unicornASCII)
+	fmt.Println("", winnerASCII, nameASCII, zeldaASCII)
+
+	// In some browsers, connection will close before all is printed
+	// - this avoids that :)
+	time.Sleep(5 * time.Second)
 }
 
 func clearConsole() {
